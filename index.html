@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bishkekalcoprom — Премиальный алкоголь и элитная vodka</title>
+
+    <style>
+        /* ==========================================================================
+           1. ОСНОВНЫЕ ПЕРЕМЕННЫЕ И ТЕМНАЯ ПРЕМИУМ ЦВЕТОВАЯ ПАЛИТРА
+           ========================================================================== */
+        :root {
+            --bg-dark: #0a0b0d;           /* Глубокий премиальный черный */
+            --bg-card: #121418;           /* Темно-серый уголь */
+            --bg-card-hover: #1a1d24;
+            --accent-gold: #d4af37;       /* Чистое золото */
+            --accent-gold-hover: #f3e5ab;
+            --accent-silver: #e2e8f0;     /* Платина / серебро */
+            --text-light: #f8fafc;
+            --text-muted: #f3f4f7;
+            --border-gold: rgba(212, 175, 55, 0.25);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cinzel', 'Playfair Display', 'Segoe UI', serif, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ==========================================================================
+           2. ПРОВЕРКА ВОЗРАСТА 18+ (CSS AGE VERIFICATION MODAL)
+           ========================================================================== */
+        .age-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 7, 0.96);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* CSS переключатель для закрытия окна 18+ */
+        #age-confirm-check {
+            display: none;
+        }
+
+        #age-confirm-check:checked ~ .age-gate {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .age-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            padding: 40px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), var(--shadow-gold);
+        }
+
+        .age-badge {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            line-height: 56px;
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .age-title {
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .age-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .age-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+            color: #000;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #f3e5ab 0%, #d4af37 100%);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-dark {
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline-dark:hover {
+            color: #ff4d4d;
+            border-color: #ff4d4d;
+        }
+
+        /* ==========================================================================
+           3. ШАПКА И НАВИГАЦИЯ (HEADER & CART BADGE WITHOUT JS)
+           ========================================================================== */
+        .top-warning-bar {
+            background: #180303;
+            color: #fca5a5;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 6px 10px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(99, 68, 239, 0.2);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .header {
+            background: rgba(10, 11, 13, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 90px;
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .logo-main {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: var(--accent-gold);
+            background: linear-gradient(180deg, #f3e5ab 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-sub {
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            transition: var(--transition);
+            position: relative;
+            padding: 8px 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-gold);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent-gold);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Корзина с выпадающим блоком на CSS hover */
+        .cart-wrapper {
+            position: relative;
+        }
+
+        .cart-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            padding: 10px 18px;
+            border-radius: 30px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .cart-btn:hover {
+            border-color: var(--accent-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .cart-badge {
+            background: var(--accent-gold);
+            color: #000;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .cart-dropdown {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            width: 320px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition);
+            z-index: 600;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .cart-wrapper:hover .cart-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cart-item img {
+            width: 100px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .cart-item-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .cart-item-price {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+        }
+
+        /* Гамбургер меню без JS */
+        .menu-checkbox {
+            display: none;
+        }
+
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            padding: 6px;
+        }
+
+        .hamburger-btn span {
+            width: 28px;
+            height: 2px;
+            background-color: var(--accent-gold);
+            transition: var(--transition);
+        }
+
+        /* ==========================================================================
+           4. ГЛАВНЫЙ БАННЕР (HERO SECTION)
+           ========================================================================== */
+        .hero {
+            position: relative;
+            padding: 150px 0 170px 0;
+            background: radial-gradient(circle at 100% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 80%),
+                        linear-gradient(250deg, rgba(10, 11, 13, 0.6) 0%, var(--bg-dark) 100%),
+                        url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQus7iHhC4FJlzpSLA39lvUGTFKUXtbs1Bw5hD4VmNPyLLULNL2ju7zMe3d&s=10') center/cover no-repeat;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+            border-left: 2px solid var(--accent-gold);
+            padding-left: 12px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            line-height: 1.15;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-light);
+            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        .hero-title span {
+            color: var(--accent-gold);
+            font-style: italic;
+        }
+
+        .hero-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 36px;
+            max-width: 580px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stat-num {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .stat-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* ==========================================================================
+           5. ФИЛЬТРАЦИЯ И КАТАЛОГ (CSS TAB FILTERING)
+           ========================================================================== */
+        .catalog-section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-subtitle {
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* Радиокнопки фильтрации */
+        .filter-inputs {
+            display: none;
+        }
+
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 12px 26px;
+            border-radius: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-tab:hover {
+            border-color: var(--accent-gold);
+            color: var(--text-light);
+        }
+
+        /* Переключение активной вкладки */
+        #filter-all:checked ~ .filter-tabs label[for="filter-all"],
+        #filter-classic:checked ~ .filter-tabs label[for="filter-classic"],
+        #filter-premium:checked ~ .filter-tabs label[for="filter-premium"],
+        #filter-infused:checked ~ .filter-tabs label[for="filter-infused"],
+        #filter-gift:checked ~ .filter-tabs label[for="filter-gift"] {
+            background: var(--accent-gold);
+            color: #000;
+            font-weight: 700;
+            border-color: var(--accent-gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* Сетка карточек товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            position: relative;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--border-gold);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.8), var(--shadow-gold);
+            background: var(--bg-card-hover);
+        }
+
+        .product-tag {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--accent-gold);
+            border: 1px solid var(--border-gold);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .product-img-box {
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .product-img-box img {
+            max-height: 150%;
+            max-width: 200%;
+            object-fit: contain;
+            transition: var(--transition);
+            filter: drop-shadow(0 32px 50px rgba(0,0,0,0.10));
+        }
+
+        .product-card:hover .product-img-box img {
+            transform: scale(1.10) rotate(1deg);
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .product-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        /* Правила скрытия карточек при фильтрации CSS */
+        #filter-classic:checked ~ .products-grid .product-card:not([data-cat="classic"]),
+        #filter-premium:checked ~ .products-grid .product-card:not([data-cat="premium"]),
+        #filter-infused:checked ~ .products-grid .product-card:not([data-cat="infused"]),
+        #filter-gift:checked ~ .products-grid .product-card:not([data-cat="gift"]) {
+            display: none;
+        }
+
+        /* ==========================================================================
+           6. БЫСТРЫЙ ПРОСМОР - МОДАЛЬНЫЕ ОКНА (CSS :target MODALS)
+           ========================================================================== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 7, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal:target {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-body {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), var(--shadow-gold);
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal:target .modal-body {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+
+        .modal-img-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+        }
+
+        .modal-img-box img {
+            max-height: 320px;
+            object-fit: contain;
+        }
+
+        .modal-details h3 {
+            font-size: 1.8rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        .modal-spec-list {
+            margin: 20px 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .modal-spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-spec-label {
+            color: var(--text-muted);
+        }
+
+        .modal-spec-val {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* ==========================================================================
+           7. БЛОК ПРЕИМУЩЕСТВ (FEATURES)
+           ========================================================================== */
+        .features-section {
+            background: rgba(18, 20, 24, 0.6);
+            padding: 80px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.2rem;
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .feature-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* ==========================================================================
+           8. ПОДВАЛ (FOOTER)
+           ========================================================================== */
+        .footer {
+            background: #060708;
+            padding: 80px 0 30px 0;
+            border-top: 1px solid var(--border-gold);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-title {
+            font-size: 1rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-gold);
+            padding-left: 5px;
+        }
+
+        .legal-warning {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            color: #f87171;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-family: system-ui, -apple-system, sans-serif;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* ==========================================================================
+           9. АДАПТИВНОСТЬ ПОД МОБИЛЬНЫЕ УСТРОЙСТВА
+           ========================================================================== */
+        @media (max-width: 992px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-tag {
+                border-left: none;
+                border-bottom: 2px solid var(--accent-gold);
+                padding-left: 0;
+                padding-bottom: 4px;
+            }
+
+            .hero-desc {
+                margin: 0 auto 30px auto;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .modal-body {
+                grid-template-columns: 1fr;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger-btn {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: absolute;
+                top: 90px;
+                left: 0;
+                right: 0;
+                background: var(--bg-card);
+                flex-direction: column;
+                padding: 30px;
+                gap: 20px;
+                border-bottom: 1px solid var(--border-gold);
+                display: none;
+            }
+
+            .menu-checkbox:checked ~ .nav-menu {
+                display: flex;
+            }
+
+            .hero-title {
+                font-size: 2.4rem;
+            }
+
+            .age-box {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. МОДАЛЬНОЕ ОКНО ПРОВЕРКИ ВОЗРАСТА 18+ (CSS CHECKBOX HACK) -->
+    <input type="checkbox" id="age-confirm-check">
+    <div class="age-gate">
+        <div class="age-box">
+            <div class="age-badge">18+</div>
+            <h2 class="age-title">Вам исполнилось 18 лет?</h2>
+            <p class="age-desc">Сайт содержит информацию об алкогольной продукции. Доступ разрешен только лицам, достигшим совершеннолетия.</p>
+            <div class="age-actions">
+                <label for="age-confirm-check" class="btn-gold">Да, мне есть 18 лет</label>
+                <a href="https://google.com" class="btn-outline-dark">Нет</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ВЕРХНЕЕ ПРЕДУПРЕЖДЕНИЕ -->
+    <div class="top-warning-bar">
+        ЧРЕЗМЕРНОЕ УПОТРЕБЛЕНИЕ АЛКОГОЛЯ ВРЕДИТ ВАШЕМУ ЗДОРОВЬЮ | 18+
+    </div>
+
+    <!-- 2. ШАПКА И НАВИГАЦИЯ (HEADER) -->
+    <header class="header">
+        <div class="container header-content">
+            <a href="#" class="logo">
+                <span class="logo-main">BISHEK ALKOPROM</span>
+                <span class="logo-sub">PREMIUM SPIRITS</span>
+            </a>
+
+            <!-- Гамбургер меню -->
+            <input type="checkbox" id="menu-checkbox" class="menu-checkbox">
+            <label for="menu-checkbox" class="hamburger-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+
+            <nav class="nav-menu">
+                <a href="#catalog" class="nav-link">Каталог</a>
+                <a href="#classic" class="nav-link">Классика</a>
+                <a href="#premium" class="nav-link">Премиум</a>
+                <a href="#about" class="nav-link">О нас</a>
+                <a href="#contacts" class="nav-link">Контакты</a>
+            </nav>
+
+            <!-- Корзина -->
+            <div class="cart-wrapper">
+                <div class="cart-btn">
+                    <span>🛒 Корзина</span>
+                    <span class="cart-badge">2</span>
+                </div>
+                <!-- Выпадающая корзина CSS -->
+                <div class="cart-dropdown">
+                    <h4 style="margin-bottom: 12px; font-size: 0.9rem; color: var(--accent-gold);">Выбранные напитки</h4>
+                    <div class="cart-item">
+                        <img src="https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&w=150&q=80" alt="Beluga">
+                        <div>
+                            <div class="cart-item-title">Beluga Gold Line</div>
+                            <div class="cart-item-price">1 x $140</div>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="cart-item">
+                        <img src="https://www.instagram.com/bishkekalcoprom/" alt="Grey Goose">
+                        <div>
+                            <div class="cart-item-title">Grey Goose VX</div>
+                            <div class="cart-item-price">1 x $85</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 50px; margin-bottom: 50px;">
+                        <span>Итого:</span>
+                        <span style="color: var(--accent-gold);">$225</span>
+                    </div>
+                    <a href="#age-confirm-check" class="btn-gold" style="width: 100%; text-align: center; box-sizing: border-box;">Оформить заказ</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. ГЛАВНЫЙ БАННЕР (HERO SECTION) -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div>
+                <span class="hero-tag">Искусство дистилляции</span>
+                <h1 class="hero-title">Чистота Вкуса и <span>Премиальное</span> Качество</h1>
+                <p class="hero-desc">Коллекция элитной водки от лучших мировых брендов. Серебряная и золотая фильтрация, идеальная мягкость и уникальные подарочные издания.</p>
+                <a href="#catalog" class="btn-gold">Перейти в каталог</a>
+
+                <div class="hero-stats">
+                    <div>
+                        <div class="stat-num">100%</div>
+                        <div class="stat-text">Оригинал</div>
+                    </div>
+                    <div>
+                        <div class="stat-num">5x</div>
+                        <div class="stat-text">Степеней очистки</div>
+                    </div>
+                    <div>
+                        <div class="stat-num">24/7</div>
+                        <div class="stat-text">Доставка</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. ИНТЕРАКТИВНЫЙ КАТАЛОГ С CSS РАДИО-ФИЛЬТРОМ -->
+    <section class="catalog-section" id="catalog">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-subtitle">Эксклюзивная коллекция</div>
+                <h2 class="section-title">Каталог Крепких Напитков</h2>
+            </div>
+
+            <!-- CSS Радио переключатели -->
+            <input type="radio" id="filter-all" name="catalog-filter" class="filter-inputs" checked>
+            <input type="radio" id="filter-classic" name="catalog-filter" class="filter-inputs">
+            <input type="radio" id="filter-premium" name="catalog-filter" class="filter-inputs">
+            <input type="radio" id="filter-infused" name="catalog-filter" class="filter-inputs">
+            <input type="radio" id="filter-gift" name="catalog-filter" class="filter-inputs">
+
+            <div class="filter-tabs">
+                <label for="filter-all" class="filter-tab">Все варианты</label>
+                <label for="filter-classic" class="filter-tab">Классическая</label>
+                <label for="filter-premium" class="filter-tab">Премиум & Элитная</label>
+                <label for="filter-infused" class="filter-tab">Особые Настойки</label>
+                <label for="filter-gift" class="filter-tab">Подарочные наборы</label>
+            </div>
+
+            <!-- Сетка товаров -->
+            <div class="products-grid">
+
+
+
+
+
+                <!-- Товар 1 -->
+                <div class="product-card" data-cat="premium">
+                    <span class="product-tag">Золотая серия</span>
+                    <div class="product-img-box">
+                        
+                        <img src="https://klvzk.ru/wp-content/uploads/2025/02/g80a8064.png" alt="Beluga Gold Line">
+                    </div>
+                    <div class="product-meta">
+                        <span>0.5L | Крепость 7%</span>
+                        <span>Солод</span>
+                    </div>
+                    <h3 class="product-title">sodju</h3>
+                    <p class="product-desc">Шедевр дистилляции с выдержкой и фильтрацией через кварцевый песок и серебро.</p>
+                    <div class="product-footer">
+                        <div class="product-price">340</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-1" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+                <!-- Товар 2 -->
+                <div class="product-card" data-cat="premium">
+                    <span class="product-tag">Франция</span>
+                    <div class="product-img-box">
+                        <img src="images.jpg" alt="Grey Goose">
+                    </div>
+                    <div class="product-meta">
+                        <span>1.0L | Крепость 40%</span>
+                        <span>Пшеница</span>
+                    </div>
+                    <h3 class="product-title">Grey Goose Original</h3>
+                    <p class="product-desc">Создана во французском регионе Коньяк из лучшей озимой пшеницы и родниковой воды.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$85</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-2" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                <!-- Товар 3 -->
+                <div class="product-card" data-cat="classic">
+                    <span class="product-tag">Классика</span>
+                    <div class="product-img-box">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9kpxNc-d2bo4ZZyweQ_IAhNufvRtCqJfHWvfMJIzlkw&s" alt="Absolut Elyx">
+                    </div>
+
+        80
+            
+            
+            
+                    <div class="product-meta">
+                        <span>0.7L | Крепость 40%</span>
+                        <span>Медный куб</span>
+                    </div>
+                    <h3 class="product-title">Absolut Elyx Pure</h3>
+                    <p class="product-desc">Роскошная шведская водка, перегнанная вручную в медном кубе 1921 года.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$65</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-1" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+                <!-- Товар 4 -->
+                <div class="product-card" data-cat="gift">
+                    <span class="product-tag">Подарок</span>
+                    <div class="product-img-box">
+                        <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=400&q=80" alt="Legend of Kremlin">
+                    </div>
+                    <div class="product-meta">
+                        <span>0.7L | Граффин</span>
+                        <span>Подарочная книга</span>
+                    </div>
+                    <h3 class="product-title">Легенда Кремля</h3>
+                    <p class="product-desc">Элитный спирт в фолианте с историческим дизайном и традиционной рецептурой.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$110</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-2" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+                <!-- Товар 5 -->
+                <div class="product-card" data-cat="infused">
+                    <span class="product-tag">Настойка</span>
+                    <div class="product-img-box">
+                        <img src="https://www.instagram.com/bishkekalcoprom/" alt="Cranberry Infused">
+                    </div>
+                    <div class="product-meta">
+                        <span>0.5L | Крепость 38%</span>
+                        <span>Клюква & Мед</span>
+                    </div>
+                    <h3 class="product-title">Клюквенная Настойка Premium</h3>
+                    <p class="product-desc">Натуральный сок северной клюквы с диким липовым медом для мягкого послевкусия.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$45</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-1" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <!-- Товар 6 -->
+                <div class="product-card" data-cat="premium">
+                    <span class="product-tag">Сибирь</span>
+                    <div class="product-img-box">
+                        <img src="https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&w=400&q=80" alt="Mamont Vodka">
+                    </div>
+                    <div class="product-meta">
+                        <span>0.7L | Бивень</span>
+                        <span>Сибирская вода</span>
+                    </div>
+                    <h3 class="product-title">Mamont Siberian Vodka</h3>
+                    <p class="product-desc">Уникальная бутылка в форме бивня мамонта. Очистка через сибирский березовый уголь.</p>
+                    <div class="product-footer">
+                        <div class="product-price">$95</div>
+                        <div class="product-actions">
+                            <a href="#modal-item-2" class="btn-icon" title="Быстрый просмотр">👁️</a>
+                            <a href="#catalog" class="btn-icon" title="В корзину">🛒</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- 5. МОДАЛЬНЫЕ ОКНА ДЕТАЛИЗАЦИИ ТОВАРА (QUICK VIEW MODALS НА CSS :target) -->
+    <!-- Модальное окно 1 -->
+    <div id="modal-item-1" class="modal">
+        <div class="modal-body">
+            <a href="#catalog" class="modal-close">&times;</a>
+            <div class="modal-img-box">
+                <img src="https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&w=600&q=80" alt="Beluga Gold Line">
+            </div>
+            <div class="modal-details">
+                <h3>Beluga Gold Line</h3>
+                <p style="color: var(--accent-gold); font-weight: bold; font-size: 1.4rem;">$140</p>
+                <p style="color: var(--text-muted); font-family: system-ui; margin: 12px 0;">Лимитированная серия для настоящих ценителей. Каждая бутылка имеет свой уникальный номер и молоточек с кисточкой для удаления сургуча с пробки.</p>
+                
+                <div class="modal-spec-list">
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Объем:</span>
+                        <span class="modal-spec-val">0.7 Л</span>
+                    </div>
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Крепость:</span>
+                        <span class="modal-spec-val">40%</span>
+                    </div>
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Фильтрация:</span>
+                        <span class="modal-spec-val">Серебро & Кварц</span>
+                    </div>
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Гастрономия:</span>
+                        <span class="modal-spec-val">Черная икра, балыки</span>
+                    </div>
+                </div>
+
+                <a href="#catalog" class="btn-gold" style="display: block; text-align: center; margin-top: 50px;">Добавить в корзину</a>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- Модальное окно 2 -->
+    <div id="modal-item-2" class="modal">
+        <div class="modal-body">
+            <a href="#catalog" class="modal-close">&times;</a>
+            <div class="modal-img-box">
+                <img src="https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=600&q=80" alt="Grey Goose">
+            </div>
+            <div class="modal-details">
+                <h3>Grey Goose Original</h3>
+                <p style="color: var(--accent-gold); font-weight: bold; font-size: 1.4rem;">$85</p>
+                <p style="color: var(--text-muted); font-family: system-ui; margin: 12px 0;">Французский эталон ультра-премиум класса. Обладает мягким вкусом с едва уловимыми нотками миндаля и свежей выпечки.</p>
+                
+                <div class="modal-spec-list">
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Страна:</span>
+                        <span class="modal-spec-val">Франция</span>
+                    </div>
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Объем:</span>
+                        <span class="modal-spec-val">1.0 Л</span>
+                    </div>
+                    <div class="modal-spec-item">
+                        <span class="modal-spec-label">Вода:</span>
+                        <span class="modal-spec-val">Родниковая Gensac</span>
+                    </div>
+                </div>
+
+                <a href="#catalog" class="btn-gold" style="display: block; text-align: center; margin-top: 20px;">Добавить в корзину</a>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- 6. БЛОК ПРЕИМУЩЕСТВА -->
+    <section class="features-section">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">100% Оригинал</h3>
+                    <p class="feature-desc">из готовлено в Кыргызстане .</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3 class="feature-title">Серебряная очистка</h3>
+                    <p class="feature-desc">Только премиум спирты категории «Альфа» и «Люкс» высокой степени очистки.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎁</div>
+                    <h3 class="feature-title">Подарочный дизайн</h3>
+                    <p class="feature-desc">Элитная фирменная упаковка и оформление персонализированных наборов.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Экспресс доставка</h3>
+                    <p class="feature-desc">Быстрая и аккуратная доставка в спецконтейнерах с соблюдением температуры.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6.5 СЕКЦИЯ "О НАС" (ABOUT US SECTION) -->
+    <section class="about-section" id="about" style="padding: 100px 0; background: linear-gradient(180deg, var(--bg-dark) 0%, #121418 100%); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <div class="about-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 50px; align-items: center;">
+                <div>
+                    <div class="section-subtitle" style="color: var(--accent-gold); text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; margin-bottom: 8px; font-family: system-ui;">Наша философия</div>
+                    <h2 class="section-title" style="font-size: 2.4rem; margin-bottom: 24px; color: var(--text-light);">Искусство Безупречной Чистоты</h2>
+                    <p style="color: var(--text-muted); font-family: system-ui; font-size: 0.95rem; margin-bottom: 16px; line-height: 1.8;">
+                        <strong style="color: var(--accent-gold);">VODKA HOUSE</strong> — это премиальный бутиковый дом, объединяющий лучшие традиции многовековой дистилляции и современные технологии многоуровневой фильтрации.
+                    </p>
+                    <p style="color: var(--text-muted); font-family: system-ui; font-size: 0.95rem; margin-bottom: 24px; line-height: 1.8;">
+                        Мы отбираем только напитки из спирта категории «Альфа», созданные на основе артезианской воды и прошедшие очистку серебром, золотом и березовым углем. Каждая бутылка в нашей коллекции — это гарантия подлинности и идеального вкусового баланса.
+                    </p>
+                    <div style="display: flex; gap: 30px; border-left: 2px solid var(--accent-gold); padding-left: 20px;">
+                        <div>
+                            <div style="font-size: 1.5rem; color: var(--accent-gold); font-weight: bold;">15+</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-family: system-ui;">Лет опыта</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.5rem; color: var(--accent-gold); font-weight: bold;">500+</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-family: system-ui;">Элитных позиций</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: relative;">
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-gold); padding: 30px; border-radius: var(--radius-md); box-shadow: var(--shadow-gold);">
+                        <h3 style="color: var(--accent-gold); font-size: 1.3rem; margin-bottom: 16px;">Стандарты VODKA HOUSE</h3>
+                        <ul style="color: var(--text-light); font-family: system-ui; font-size: 0.9rem; line-height: 2;">
+                            <li>✓ Прямой импорт от лучших винокурен мира</li>
+                            <li>✓ Температурный контроль хранения 24/7</li>
+                            <li>✓ Индивидуальная подарочная гравировка</li>
+                            <li>✓ Конфиденциальная курьерская доставка</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. ПОДВАЛ (FOOTER) -->
+    <footer class="footer" id="contacts">
+        <div class="container">
+            <!-- Предупреждение -->
+            <div class="legal-warning">
+                Чрезмерное употребление алкоголя вредит вашему здоровью. Продажа несовершеннолетним запрещена.
+            </div>
+
+            <div class="footer-grid">
+                <div>
+                    <a href="#" class="logo" style="margin-bottom: 16px;">
+                        <span class="logo-main">BISHEK ALKOPROM HOUSE</span>
+                        <span class="logo-sub">PREMIUM SPIRITS</span>
+                    </a>
+                    <p style="color: var(--text-muted); font-family: system-ui; font-size: 0.85rem;">Онлайн-галерея элитных крепких напитков и эксклюзивных подарочных решений.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Категории</h4>
+                    <ul class="footer-links">
+                        <li><a href="#catalog">Классическая водка</a></li>
+                        <li><a href="#catalog">Ультра-премиум</a></li>
+                        <li><a href="#catalog">Особые настойки</a></li>
+                        <li><a href="#catalog">Подарочные наборы</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Информация</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">О компании</a></li>
+                        <li><a href="#">Сертификаты</a></li>
+                        <li><a href="#">Правила доставки</a></li>
+                        <li><a href="#">Условия возврата</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Контакты</h4>
+                    <ul class="footer-links">
+                        <li>📍 г. Бишкек, ул.Каарманский </li>
+                        <li>📞 +996 557 107 557</li>
+                        <li>✉️ osmonovkuttubek@gmail.com</li>
+                        <li>🕒 Часы работы: 09:00 - 18:00</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                &copy; 2026 VODKA HOUSE. Все права защищены. 
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
